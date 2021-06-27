@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Express Static Website</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+{{>styleandjs}}
+</head>
+<body>
+
+{{>header}}
+  
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12 mb-2">
+        <h1 class="theme text-center">Check Weather of your city</h1>
+    </div>
+    <div class=" offset-3 col-sm-6 mb-5">
+       <div class="input-group mb-3 ml-4">
+       <input class="form-control" id="city" name="city" placeholder="Enter your city name" autocomplete="off" />
+        <div class="input-group-append">
+          <input class="btn btn-success" type="submit" value="submit" id="submit" />
+          {{!-- <button class="btn btn-success" type="submit">Go</button>   --}}
+         </div>
+      </div>
+      <div class="temp-info">
+          <div class="top-layer">
+            <p id="day">Day</p>
+            <p id="day-data">Today data</p>
+          </div>
+          <div class="main-layer">
+            <p id="city-name">Please write city name in serch bar</p>
+            <div class="data-hide">
+              <p><span id="temp"></span><span class="degc"><sup>o</sup>C</span> <span id="tempstatus"></span></p>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{>footer}}
+  <script>
+    const cityName = document.getElementById('city');
+    const cityNameOut = document.getElementById('city-name');
+    const temp = document.getElementById('temp');
+    const tempstatus = document.getElementById('tempstatus');
+    const submitBtn = document.getElementById('submit');
+    const dataHide = document.querySelector('.data-hide');
+    const degc = document.querySelector('.degc');
+    const days = document.getElementById('day');
+
+        const getCurrentDay = () => {
+        const weekday = new Array(7);
+        weekday[0] = "Sunday";
+        weekday[1] = "Monday";
+        weekday[2] = "Tue";
+        weekday[3] = "Wed";
+        weekday[4] = "Thursday";
+        weekday[5] = "Friday";
+        weekday[6] = "Saturday";
+
+        let currentTime = new Date();
+        let day = weekday[currentTime.getDay()];
+        days.innerText = day;
+       // return day;
+      };
+      getCurrentDay();
+
+
+   const getInfo = async(event) => {
+     event.preventDefault();
+     let cityVal = cityName.value;
+  if( cityVal === "" ) {
+     cityNameOut.innerText = `Please write city name in serch bar`;
+     dataHide.classList.add('data-hid');
+     degc.classList.remove('oc');
+  } else {
+    try{
+       let url = `https://api.openweathermap.org/data/2.5/weather?q=${cityVal}&units=metric&appid=9d71fa96410ad488e71499f3a762664f`;
+       const response = await fetch(url);
+       const data = await response.json();
+       const arData = [data];
+       temp.innerText = arData[0].main.temp;
+       //days.innerText = day;
+       //tempstatus.innerText = arData[0].weather[0].main;
+       cityNameOut.innerText = `${arData[0].name}, ${arData[0].sys.country}`;
+       const tempmood = arData[0].weather[0].main;
+       
+       if (tempmood === "Clear"){
+           tempstatus.innerHTML = '<i class="fa fa-sun" style="color: orange;"></i>';
+       } else if (tempmood === "Clouds") {
+         tempstatus.innerHTML = '<i class="fa fa-cloud" style="color: white;"></i>';
+       } else if (tempmood === "Rain") {
+         tempstatus.innerHTML = '<i class="fa fa-cloud-rain" style="color: #fff;"></i>';
+       } else {
+         tempstatus.innerHTML = '<i class="fa fa-sun" style="color: orange;"></i>';
+       }
+      dataHide.classList.remove('data-hid');
+      degc.classList.add('oc');
+    } catch{
+        cityNameOut.innerText = `Please enter city name properly`;
+        degc.classList.remove('oc');
+        //dataHide.classList.add('data-hid');
+    }      
+  }
+}
+submitBtn.addEventListener('click', getInfo);
+    </script>
+</body>
+</html>
